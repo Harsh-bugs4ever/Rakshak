@@ -1,0 +1,156 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Rakshak - road accident emergency and aftermath guidance API.
+  Runs locally against LocalStack via `sam local start-api`.
+
+Globals:
+  Function:
+    Runtime: python3.12
+    # 512MB is the knee of the price/performance curve for these handlers: the
+    # work is a DynamoDB round trip plus JSON, and less memory means a slower
+    # vCPU share on cold start.
+    MemorySize: 512
+    Timeout: 10
+    Architectures: [x86_64]
+    Environment:
+      Variables:
+        TABLE_EMERGENCY_PROTOCOLS: !Ref EmergencyProtocolsTable
+        TABLE_AFTERMATH_STEPS: !Ref AftermathStepsTable
+        TABLE_FAQS: !Ref FAQsTable
+        TABLE_RESOURCES: !Ref ResourcesTable
+        AWS_ENDPOINT_URL: !Ref DynamoEndpoint
+        LOG_LEVEL: INFO
+        DEFAULT_PAGE_SIZE: '20'
+        MAX_PAGE_SIZE: '50'
+  Api:
+    Cors:
+      AllowOrigin: "'*'"
+      AllowHeaders: "'Content-Type,X-User-Role,X-User-Id'"
+      AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
+
+Parameters:
+  DynamoEndpoint:
+    Type: String
+    Default: http://host.docker.internal:4566
+    Description: >
+      LocalStack endpoint as seen from inside the Lambda container. Set to an
+      empty string to use the real AWS endpoint.
+
+Resources:
+
+  EmergencyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: src.handlers.emergency.handler
+      Description: Emergency protocols, helpline numbers, Good Samaritan rights.
+      Policies:
+        - DynamoDBReadPolicy: { TableName: !Ref EmergencyProtocolsTable }
+      Events:
+        Protocols:
+          Type: Api
+          Properties: { Path: /emergency/protocols, Method: get }
+        Numbers:
+          Type: Api
+          Properties: { Path: /emergency/numbers, Method: get }
+        GoodSamaritan:
+          Type: Api
+          Properties: { Path: /emergency/good-samaritan, Method: get }
+
+  AftermathFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: src.handlers.aftermath.handler
+      Description: Aftermath stage checklists and FAQ search.
+      Policies:
+        - DynamoDBReadPolicy: { TableName: !Ref AftermathStepsTable }
+        - DynamoDBReadPolicy: { TableName: !Ref FAQsTable }
+      Events:
+        Steps:
+          Type: Api
+          Properties: { Path: /aftermath/steps, Method: get }
+        Faqs:
+          Type: Api
+          Properties: { Path: /aftermath/faqs, Method: get }
+
+  ResourcesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: src.handlers.resources.handler
+      Description: Hospitals, legal aid, NGOs and government schemes.
+      Policies:
+        - DynamoDBReadPolicy: { TableName: !Ref ResourcesTable }
+      Events:
+        List:
+          Type: Api
+          Properties: { Path: /resources, Method: get }
+
+  HealthFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: src.handlers.health.handler
+      Description: Table availability and row counts.
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: [dynamodb:DescribeTable]
+              Resource: '*'
+      Events:
+        Health:
+          Type: Api
+          Properties: { Path: /health, Method: get }
+
+  EmergencyProtocolsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: EmergencyProtocols
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - { AttributeName: scenario_id, AttributeType: S }
+      KeySchema:
+        - { AttributeName: scenario_id, KeyType: HASH }
+
+  AftermathStepsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: AftermathSteps
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - { AttributeName: stage_id, AttributeType: S }
+      KeySchema:
+        - { AttributeName: stage_id, KeyType: HASH }
+
+  FAQsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: FAQs
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - { AttributeName: faq_id, AttributeType: S }
+        - { AttributeName: topic, AttributeType: S }
+      KeySchema:
+        - { AttributeName: faq_id, KeyType: HASH }
+      GlobalSecondaryIndexes:
+        - IndexName: topic-index
+          KeySchema:
+            - { AttributeName: topic, KeyType: HASH }
+          Projection: { ProjectionType: ALL }
+
+  ResourcesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Resources
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - { AttributeName: resource_id, AttributeType: S }
+      KeySchema:
+        - { AttributeName: resource_id, KeyType: HASH }
+
+Outputs:
+  ApiUrl:
+    Description: Base URL of the Rakshak API
+    Value: !Sub https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod

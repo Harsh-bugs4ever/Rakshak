@@ -1,0 +1,78 @@
+[
+  {
+    "stage_id": "hospital",
+    "order": 1,
+    "title": "At Hospital",
+    "subtitle": "First 48 hours. Get the paperwork right while treatment happens.",
+    "checklist": [
+      "Ask the hospital to register the case as an MLC (Medico-Legal Case).",
+      "Note down the MLC number and the name of the treating doctor.",
+      "Collect the admission summary, prescriptions and every test report.",
+      "Keep every bill and receipt, including pharmacy and ambulance bills.",
+      "Photograph injuries and the discharge summary on your phone as backup."
+    ],
+    "details": [
+      "An MLC is the hospital's official record that the injury came from an accident. Insurance claims and MACT compensation both depend on it, so do not leave the hospital without the MLC number.",
+      "Emergency treatment cannot be refused for lack of money, police clearance or paperwork. If a hospital refuses, note the time and the staff name, and call 112.",
+      "Original bills matter. Insurers and the tribunal both ask for originals, so make photocopies for yourself before submitting anything."
+    ],
+    "tags": ["hospital", "mlc", "documents", "bills"]
+  },
+  {
+    "stage_id": "police",
+    "order": 2,
+    "title": "At Police Station",
+    "subtitle": "The FIR is the foundation of every claim that follows.",
+    "checklist": [
+      "File the FIR at the police station nearest the accident spot.",
+      "Check that the date, time, place, vehicle numbers and injuries are recorded correctly before signing.",
+      "Ask for a free copy of the FIR - it is your right.",
+      "Get the accident site sketch and the seizure memo numbers if a vehicle was seized.",
+      "For an unknown vehicle, insist it is registered as a hit-and-run case."
+    ],
+    "details": [
+      "If the station refuses to register the FIR, you can send a written complaint to the Superintendent of Police, or approach a Magistrate under Section 156(3) CrPC.",
+      "Ask specifically for the Accident Information Report (AIR), which the police are required to forward to the Motor Accidents Claims Tribunal.",
+      "Errors in the FIR are hard to correct later. Read it fully - or have it read to you - before signing."
+    ],
+    "tags": ["police", "fir", "hit-and-run", "air"]
+  },
+  {
+    "stage_id": "insurance",
+    "order": 3,
+    "title": "Insurance Claim",
+    "subtitle": "Inform early, document everything, follow up in writing.",
+    "checklist": [
+      "Inform the insurance company as soon as possible - a phone call plus an email the same day.",
+      "Note the claim reference number given to you.",
+      "Assemble: FIR copy, MLC papers, hospital bills, discharge summary, photographs, driving licence, RC and policy copy.",
+      "Fill the insurer's claim form completely - blanks cause rejections.",
+      "Keep a copy of everything you submit, and get an acknowledgement."
+    ],
+    "details": [
+      "Third-party injury and death claims are not settled by the insurer directly - they go through the Motor Accidents Claims Tribunal (MACT), with the insurer as a party.",
+      "For hit-and-run cases where the vehicle is never traced, the government's Solatium/compensation scheme pays a fixed amount. The application goes through the police record and the district administration.",
+      "Delay in intimation is a common reason for rejection. If you were delayed because of the medical emergency, say so in writing and keep proof."
+    ],
+    "tags": ["insurance", "claim", "solatium", "hit-and-run"]
+  },
+  {
+    "stage_id": "legal",
+    "order": 4,
+    "title": "Legal Aid & Compensation",
+    "subtitle": "Free legal help exists. You do not need to pay a lawyer to start.",
+    "checklist": [
+      "Approach the District or State Legal Services Authority (DLSA/SLSA) for free legal aid.",
+      "File the compensation claim before the Motor Accidents Claims Tribunal (MACT) in the district of the accident, the victim's residence or the respondent's residence.",
+      "Collect income proof - salary slips, ITR, or employer certificate - which decides the compensation amount.",
+      "Keep a running file of all medical expenses and days of work lost.",
+      "Ask about interim compensation while the case is pending."
+    ],
+    "details": [
+      "MACT compensation can cover medical expenses, loss of income, future loss of earning capacity, pain and suffering, and in fatal cases loss of dependency and funeral expenses.",
+      "Legal aid through SLSA is free for accident victims and their families regardless of income in many states - ask at the District Court complex, where every DLSA has an office.",
+      "There is no strict limitation period for filing a MACT claim, but filing early makes evidence and witnesses far easier to secure."
+    ],
+    "tags": ["legal", "mact", "slsa", "compensation"]
+  }
+]

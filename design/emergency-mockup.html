@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F6F7F9">
+<title>Rakshak Emergency</title>
+<style>
+  :root {
+    --danger: #D92B2B;
+    --danger-press: #B01F1F;
+    --ink: #111827;
+    --ink-soft: #5B6472;
+    --surface: #FFFFFF;
+    --bg: #F6F7F9;
+    --accent: #1B3A6B;
+    --accent-tint: #E8EEF8;
+    --warn-bg: #FFF6E5;
+    --warn-ink: #7A4E00;
+    --line: #E3E6EB;
+    --radius: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --danger: #FF5A52; --danger-press: #E0463F;
+      --ink: #F2F4F7; --ink-soft: #9AA4B2;
+      --surface: #14181F; --bg: #0B0E13;
+      --accent: #8FB6F0; --accent-tint: #16202F;
+      --warn-bg: #2A2113; --warn-ink: #F0C878;
+      --line: #252B35;
+    }
+  }
+  :root[data-theme="dark"] {
+    --danger: #FF5A52; --danger-press: #E0463F;
+    --ink: #F2F4F7; --ink-soft: #9AA4B2;
+    --surface: #14181F; --bg: #0B0E13;
+    --accent: #8FB6F0; --accent-tint: #16202F;
+    --warn-bg: #2A2113; --warn-ink: #F0C878;
+    --line: #252B35;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font: 400 16px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .app { max-width: 430px; margin: 0 auto; min-height: 100vh; padding-bottom: 132px; }
+
+  /* Header */
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-block: 12px; padding-inline: 16px;
+    background: var(--surface); border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; z-index: 10;
+  }
+  .brand { font-weight: 700; font-size: 17px; letter-spacing: -.01em; }
+  .brand span { color: var(--danger); }
+  .lang {
+    border: 1px solid var(--line); background: transparent; color: var(--ink-soft);
+    border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 600;
+    min-height: 32px; cursor: pointer;
+  }
+
+  /* Good Samaritan strip */
+  .gs {
+    display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+    background: var(--warn-bg); color: var(--warn-ink);
+    border: none; border-bottom: 1px solid var(--line);
+    padding: 12px 16px; font-size: 14px; font-weight: 600; cursor: pointer;
+    min-height: 48px; font-family: inherit;
+  }
+  .gs .chev { margin-left: auto; opacity: .6; font-weight: 700; }
+
+  section { padding-inline: 16px; }
+
+  /* Primary actions */
+  .actions { padding-block: 16px; display: grid; gap: 12px; }
+  .btn {
+    display: flex; align-items: center; gap: 14px;
+    width: 100%; border-radius: var(--radius); text-decoration: none;
+    font-family: inherit; cursor: pointer; border: 2px solid transparent;
+    padding-inline: 18px;
+  }
+  .btn .ico { font-size: 26px; line-height: 1; }
+  .btn .txt { display: flex; flex-direction: column; }
+  .btn .lead { font-weight: 700; letter-spacing: -.01em; }
+  .btn .sub { font-size: 13px; font-weight: 500; opacity: .85; }
+
+  .btn-danger {
+    min-height: 72px; background: var(--danger); color: #fff;
+    box-shadow: 0 6px 18px -6px rgba(217,43,43,.55);
+  }
+  .btn-danger .lead { font-size: 22px; }
+  .btn-danger:active { background: var(--danger-press); transform: scale(.985); }
+
+  .btn-secondary {
+    min-height: 64px; background: var(--surface); color: var(--ink);
+    border-color: var(--accent);
+  }
+  .btn-secondary .lead { font-size: 18px; }
+  .btn-secondary:active { background: var(--accent-tint); transform: scale(.985); }
+
+  /* Triage */
+  .block-title { font-size: 12px; font-weight: 700; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--ink-soft); margin: 6px 0 8px; }
+  .question { font-size: 21px; font-weight: 700; letter-spacing: -.02em; margin: 0 0 12px; }
+  .triage { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .opt {
+    min-height: 56px; border-radius: var(--radius); border: 2px solid var(--line);
+    background: var(--surface); color: var(--ink);
+    font: 600 16px/1 inherit; font-family: inherit; cursor: pointer;
+  }
+  .opt:active { transform: scale(.97); }
+  .opt[aria-pressed="true"] {
+    border-color: var(--accent); background: var(--accent-tint); color: var(--accent);
+  }
+
+  /* Steps */
+  #result { margin-top: 18px; }
+  #result[hidden] { display: none; }
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 16px; margin-bottom: 12px;
+  }
+  .card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .card-head h3 { margin: 0; font-size: 17px; letter-spacing: -.01em; }
+  .badge {
+    font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+    padding: 4px 9px; border-radius: 999px; background: var(--danger); color: #fff;
+  }
+  .badge.warn { background: var(--warn-ink); color: var(--warn-bg); }
+
+  ol.steps { list-style: none; margin: 0; padding: 0; counter-reset: s; }
+  ol.steps li {
+    counter-increment: s; display: flex; gap: 12px;
+    padding: 12px 0; border-top: 1px solid var(--line);
+    font-size: 17px; line-height: 1.4;
+  }
+  ol.steps li:first-child { border-top: none; padding-top: 0; }
+  ol.steps li::before {
+    content: counter(s);
+    flex: none; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--accent-tint); color: var(--accent);
+    font-size: 14px; font-weight: 800;
+    display: grid; place-items: center; margin-top: 1px;
+  }
+
+  .donot { background: color-mix(in srgb, var(--danger) 8%, var(--surface));
+    border-color: color-mix(in srgb, var(--danger) 30%, var(--line)); }
+  .donot h3 { color: var(--danger); }
+  ul.nots { list-style: none; margin: 0; padding: 0; }
+  ul.nots li { display: flex; gap: 12px; padding: 7px 0; font-size: 16px; font-weight: 500; }
+  ul.nots li::before { content: "✕"; color: var(--danger); font-weight: 800; flex: none; }
+
+  /* Secondary links */
+  .links { margin-top: 18px; border-top: 1px solid var(--line); }
+  .link-row {
+    display: flex; align-items: center; gap: 12px; width: 100%;
+    background: none; border: none; border-bottom: 1px solid var(--line);
+    padding: 16px 0; min-height: 56px; text-align: left; cursor: pointer;
+    color: var(--ink); font: 600 16px inherit; font-family: inherit;
+  }
+  .link-row .ico { font-size: 20px; }
+  .link-row .chev { margin-left: auto; color: var(--ink-soft); }
+
+  /* Sticky ask bar + tab bar */
+  .dock {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 20;
+    background: var(--surface); border-top: 1px solid var(--line);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .dock-inner { max-width: 430px; margin: 0 auto; }
+  .ask { display: flex; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--line); }
+  .ask input {
+    flex: 1; min-width: 0; min-height: 44px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+    padding: 0 16px; font-size: 15px; font-family: inherit;
+  }
+  .ask button {
+    flex: none; width: 44px; height: 44px; border-radius: 50%;
+    border: none; background: var(--accent-tint); color: var(--accent);
+    font-size: 18px; cursor: pointer;
+  }
+  .tabs { display: grid; grid-template-columns: 1fr 1fr; }
+  .tab {
+    min-height: 56px; border: none; background: none; cursor: pointer;
+    font: 600 14px inherit; font-family: inherit; color: var(--ink-soft);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    border-top: 3px solid transparent;
+  }
+  .tab .ico { font-size: 19px; }
+  .tab[aria-selected="true"] { color: var(--danger); border-top-color: var(--danger); }
+
+  /* Sheet */
+  .sheet[hidden] { display: none; }
+  .sheet {
+    position: fixed; inset: 0; z-index: 40;
+    background: rgba(0,0,0,.45); display: flex; align-items: flex-end;
+  }
+  .sheet-body {
+    background: var(--surface); width: 100%; max-width: 430px; margin: 0 auto;
+    border-radius: 18px 18px 0 0; padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+    max-height: 82vh; overflow-y: auto;
+  }
+  .sheet-body h3 { margin: 0 0 12px; font-size: 19px; }
+  .sheet-body li { margin-bottom: 10px; font-size: 16px; }
+  .sheet-close {
+    width: 100%; min-height: 50px; margin-top: 8px; border-radius: var(--radius);
+    border: none; background: var(--accent-tint); color: var(--accent);
+    font: 700 16px inherit; font-family: inherit; cursor: pointer;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    #result > * { animation: rise .14s ease-out both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(6px); } }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="brand">रक्षक <span>Rakshak</span></div>
+    <button class="lang" id="lang">EN · हिं</button>
+  </header>
+
+  <button class="gs" id="gsStrip">
+    <span>🛡️</span>
+    <span>You are protected as a Good Samaritan.</span>
+    <span class="chev">›</span>
+  </button>
+
+  <section class="actions">
+    <a class="btn btn-danger" href="tel:108">
+      <span class="ico">🚑</span>
+      <span class="txt"><span class="lead">Call Ambulance</span><span class="sub">108 · 112</span></span>
+    </a>
+    <a class="btn btn-secondary" href="tel:112">
+      <span class="ico">🚔</span>
+      <span class="txt"><span class="lead">Call Police</span><span class="sub">112</span></span>
+    </a>
+    <button class="btn btn-secondary" id="share">
+      <span class="ico">📍</span>
+      <span class="txt"><span class="lead">Share Location &amp; Info</span><span class="sub" id="shareSub">Sends a map pin on WhatsApp</span></span>
+    </button>
+  </section>
+
+  <section>
+    <p class="block-title">While you wait</p>
+    <h2 class="question">Is the person breathing?</h2>
+    <div class="triage" role="group" aria-label="Is the person breathing?">
+      <button class="opt" data-a="yes" aria-pressed="false">Yes</button>
+      <button class="opt" data-a="no" aria-pressed="false">No</button>
+      <button class="opt" data-a="unsure" aria-pressed="false">Not sure</button>
+    </div>
+
+    <div id="result" hidden></div>
+
+    <div class="links">
+      <button class="link-row"><span class="ico">🏥</span> Nearest trauma centres <span class="chev">›</span></button>
+      <button class="link-row" id="gsRow"><span class="ico">⚖️</span> Your rights as a helper <span class="chev">›</span></button>
+    </div>
+  </section>
+</div>
+
+<div class="dock">
+  <div class="dock-inner">
+    <form class="ask" onsubmit="return false">
+      <input type="text" placeholder="Ask a question…" aria-label="Ask a question">
+      <button type="button" aria-label="Voice input">🎤</button>
+    </form>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" aria-selected="true"><span class="ico">🚨</span>Emergency</button>
+      <button class="tab" role="tab" aria-selected="false"><span class="ico">📋</span>Aftermath</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="sheet" hidden>
+  <div class="sheet-body">
+    <h3>Your rights as a helper</h3>
+    <ul>
+      <li>You cannot be forced to reveal your name or address.</li>
+      <li>You cannot be detained or made to pay for the victim's treatment.</li>
+      <li>Hospitals must begin emergency treatment without waiting for police formalities.</li>
+      <li>If you choose to be a witness, you can be examined only once, at a time and place you pick.</li>
+    </ul>
+    <button class="sheet-close" id="sheetClose">Got it</button>
+  </div>
+</div>
+
+<script>
+  // Bundled offline copy of the protocols the API also serves.
+  const PROTOCOLS = {
+    not_breathing: {
+      title: "Person is not breathing",
+      severity: "Critical",
+      steps: [
+        "Tap their shoulder and shout. Do they respond?",
+        "Call 112 now. Put the phone on speaker.",
+        "Push hard and fast in the centre of the chest, 100–120 per minute.",
+        "Do not stop until they breathe or help takes over."
+      ],
+      do_not: ["Do not give water or food.", "Do not shake or twist the neck.", "Do not leave them to look for help."]
+    },
+    breathing_injured: {
+      title: "Breathing but injured",
+      severity: "Keep them still",
+      steps: [
+        "Call 112 and say the exact location.",
+        "Press a clean cloth firmly on any bleeding wound.",
+        "Keep them warm and talking. Loosen tight clothing.",
+        "Stay with them until help arrives."
+      ],
+      do_not: ["Do not move them unless there is fire risk.", "Do not remove the helmet.", "Do not give water or medicine."]
+    }
+  };
+
+  const result = document.getElementById('result');
+
+  function render(key) {
+    const p = PROTOCOLS[key];
+    const critical = key === 'not_breathing';
+    result.innerHTML = `
+      <div class="card">
+        <div class="card-head">
+          <h3>${p.title}</h3>
+          <span class="badge ${critical ? '' : 'warn'}">${p.severity}</span>
+        </div>
+        <ol class="steps">${p.steps.map(s => `<li>${s}</li>`).join('')}</ol>
+      </div>
+      <div class="card donot">
+        <div class="card-head"><h3>Do not</h3></div>
+        <ul class="nots">${p.do_not.map(s => `<li>${s}</li>`).join('')}</ul>
+      </div>`;
+    result.hidden = false;
+  }
+
+  document.querySelectorAll('.opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.opt').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+      if (navigator.vibrate) navigator.vibrate(15);
+      const key = btn.dataset.a === 'yes' ? 'breathing_injured' : 'not_breathing';
+      sessionStorage.setItem('triage', btn.dataset.a);
+      render(key);
+    });
+  });
+
+  // Restore the answer if they locked the phone and came back.
+  const saved = sessionStorage.getItem('triage');
+  if (saved) document.querySelector(`.opt[data-a="${saved}"]`)?.click();
+
+  // Location is requested on load, not on tap, so the pin is ready when needed.
+  let coords = null;
+  navigator.geolocation?.getCurrentPosition(
+    pos => {
+      coords = pos.coords;
+      document.getElementById('shareSub').textContent = 'Location ready · sends a map pin';
+    },
+    () => { document.getElementById('shareSub').textContent = 'Add the nearest landmark yourself'; },
+    { enableHighAccuracy: true, timeout: 8000 }
+  );
+
+  document.getElementById('share').addEventListener('click', () => {
+    const pin = coords ? ` https://maps.google.com/?q=${coords.latitude},${coords.longitude}` : '';
+    const text = `Road accident${pin ? ' at' + pin : ' nearby'}. Need ambulance and police. Please help.`;
+    if (navigator.share) navigator.share({ text }).catch(() => {});
+    else location.href = 'sms:?body=' + encodeURIComponent(text);
+  });
+
+  const sheet = document.getElementById('sheet');
+  const openSheet = () => sheet.hidden = false;
+  document.getElementById('gsStrip').addEventListener('click', openSheet);
+  document.getElementById('gsRow').addEventListener('click', openSheet);
+  document.getElementById('sheetClose').addEventListener('click', () => sheet.hidden = true);
+  sheet.addEventListener('click', e => { if (e.target === sheet) sheet.hidden = true; });
+</script>
+</body>
+</html>

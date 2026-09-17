@@ -1,0 +1,107 @@
+[
+  {
+    "faq_id": "faq_gs_identity",
+    "question": "If I help an accident victim, will the police harass me?",
+    "answer": "No. Under the Good Samaritan rules, you cannot be forced to reveal your identity, you cannot be detained, and you are not liable for the outcome. If you choose to stay as a witness, you can be examined only once, at a time and place of your choosing.",
+    "topic": "good_samaritan",
+    "tags": ["police", "bystander", "rights"]
+  },
+  {
+    "faq_id": "faq_gs_hospital_payment",
+    "question": "Do I have to pay if I bring an injured person to a hospital?",
+    "answer": "No. A Good Samaritan who brings a victim to hospital has no obligation to pay for treatment, and the hospital cannot demand it from you as a condition of treating them.",
+    "topic": "good_samaritan",
+    "tags": ["hospital", "money", "bystander"]
+  },
+  {
+    "faq_id": "faq_hospital_refuse",
+    "question": "The hospital is refusing treatment until we deposit money. What do we do?",
+    "answer": "Emergency care cannot be denied for lack of payment or police formalities - this applies to government and private hospitals alike. Ask for the refusal in writing, note the time and staff name, and call 112. Escalating to the hospital administrator usually resolves it immediately.",
+    "topic": "hospital",
+    "tags": ["emergency", "refusal", "rights"]
+  },
+  {
+    "faq_id": "faq_mlc",
+    "question": "What is an MLC and why does it matter?",
+    "answer": "MLC stands for Medico-Legal Case. It is the hospital's official record linking the injuries to an accident. Insurance claims and MACT compensation both rely on it, so get the MLC number before discharge.",
+    "topic": "hospital",
+    "tags": ["mlc", "documents"]
+  },
+  {
+    "faq_id": "faq_fir_needed",
+    "question": "Do we need an FIR for the insurance claim?",
+    "answer": "Yes, for injury and death claims the FIR is essential - it establishes how the accident happened and who was involved. Insurers and the tribunal will both ask for a copy.",
+    "topic": "fir",
+    "tags": ["insurance", "fir"]
+  },
+  {
+    "faq_id": "faq_fir_delay",
+    "question": "The police are refusing or delaying the FIR. What are our options?",
+    "answer": "Send a written complaint by registered post to the Superintendent of Police. If that fails, a Magistrate can direct registration of the FIR under Section 156(3) CrPC. Keep proof of every attempt you made.",
+    "topic": "fir",
+    "tags": ["police", "delay", "escalation"]
+  },
+  {
+    "faq_id": "faq_fir_copy",
+    "question": "Can the police charge us for a copy of the FIR?",
+    "answer": "No. The informant is entitled to a free copy of the FIR. In most states the FIR is also published online on the state police website.",
+    "topic": "fir",
+    "tags": ["fir", "documents", "rights"]
+  },
+  {
+    "faq_id": "faq_hit_and_run",
+    "question": "The vehicle that hit my relative ran away. Can we still get compensation?",
+    "answer": "Yes. For untraced vehicles, the government's hit-and-run compensation scheme pays a fixed amount for death and for grievous injury. The application is made through the police record and the district administration, and does not require you to identify the vehicle.",
+    "topic": "insurance",
+    "tags": ["hit-and-run", "solatium", "compensation"]
+  },
+  {
+    "faq_id": "faq_insurance_deadline",
+    "question": "How soon must we inform the insurance company?",
+    "answer": "As soon as possible - ideally within 24 to 48 hours. Call and follow up with an email the same day so you have a timestamp. If the medical emergency delayed you, state that in writing.",
+    "topic": "insurance",
+    "tags": ["intimation", "deadline"]
+  },
+  {
+    "faq_id": "faq_insurance_documents",
+    "question": "What documents does the insurer ask for?",
+    "answer": "FIR copy, MLC papers, hospital bills and discharge summary, photographs of the vehicles and injuries, driving licence, registration certificate, and the policy copy. Photocopy everything before you submit the originals.",
+    "topic": "insurance",
+    "tags": ["documents", "claim"]
+  },
+  {
+    "faq_id": "faq_mact_what",
+    "question": "What is MACT and do we need a lawyer?",
+    "answer": "The Motor Accidents Claims Tribunal decides compensation for road accident injuries and deaths. You can file yourself, but free legal aid through the District Legal Services Authority is available and most families use it.",
+    "topic": "legal_aid",
+    "tags": ["mact", "lawyer", "slsa"]
+  },
+  {
+    "faq_id": "faq_legal_aid_where",
+    "question": "Where do we get free legal aid?",
+    "answer": "Every district court complex has a District Legal Services Authority (DLSA) office. Accident victims and their families can apply there, and the state authority (SLSA) also runs a helpline. Take your FIR copy and medical records with you.",
+    "topic": "legal_aid",
+    "tags": ["slsa", "dlsa", "free"]
+  },
+  {
+    "faq_id": "faq_compensation_heads",
+    "question": "What can compensation cover?",
+    "answer": "Medical expenses, loss of income during treatment, future loss of earning capacity if there is disability, pain and suffering, attendant and transport costs, and in fatal cases loss of dependency plus funeral expenses.",
+    "topic": "compensation",
+    "tags": ["mact", "heads", "amount"]
+  },
+  {
+    "faq_id": "faq_compensation_income_proof",
+    "question": "What if the victim had no salary slip - daily wage or self-employed?",
+    "answer": "The tribunal can assess notional income based on the nature of work and minimum wage notifications. Bring whatever you have: employer statements, bank entries, contractor letters, GST or shop records.",
+    "topic": "compensation",
+    "tags": ["income", "informal", "proof"]
+  },
+  {
+    "faq_id": "faq_interim_relief",
+    "question": "The case will take time. Can we get money sooner?",
+    "answer": "Yes. You can apply for interim compensation while the claim is pending, and in no-fault cases a fixed amount is payable without proving negligence. Ask the DLSA lawyer to move this application early.",
+    "topic": "compensation",
+    "tags": ["interim", "no-fault", "urgent"]
+  }
+]

@@ -1,0 +1,3 @@
+# Lambda runtime dependencies.
+# boto3 ships in the Lambda runtime but is pinned here for local SAM parity.
+boto3>=1.34.0
