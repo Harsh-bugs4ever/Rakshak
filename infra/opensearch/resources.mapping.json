@@ -1,0 +1,42 @@
+{
+  "settings": {
+    "index": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "analysis": {
+      "analyzer": {
+        "rakshak_text": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": ["lowercase", "asciifolding"]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "resource_id": { "type": "keyword" },
+      "name": {
+        "type": "text",
+        "analyzer": "rakshak_text",
+        "fields": { "raw": { "type": "keyword" } }
+      },
+      "type": { "type": "keyword" },
+      "state": { "type": "keyword" },
+      "city": { "type": "keyword" },
+      "address": { "type": "text", "analyzer": "rakshak_text" },
+      "description": { "type": "text", "analyzer": "rakshak_text" },
+      "hours": { "type": "keyword" },
+      "tags": { "type": "keyword" },
+      "geo": { "type": "geo_point" },
+      "contact": {
+        "properties": {
+          "phone": { "type": "keyword" },
+          "alt_phone": { "type": "keyword" },
+          "website": { "type": "keyword" }
+        }
+      }
+    }
+  }
+}

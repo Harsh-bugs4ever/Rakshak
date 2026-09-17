@@ -1,0 +1,39 @@
+{
+  "settings": {
+    "index": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "analysis": {
+      "filter": {
+        "rakshak_synonyms": {
+          "type": "synonym",
+          "synonyms": [
+            "fir, f.i.r, first information report",
+            "mlc, m.l.c, medico legal case",
+            "mact, m.a.c.t, motor accidents claims tribunal",
+            "slsa, dlsa, legal services authority",
+            "hit and run, hit-and-run, untraced vehicle",
+            "compensation, claim, damages"
+          ]
+        }
+      },
+      "analyzer": {
+        "rakshak_faq": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": ["lowercase", "asciifolding", "rakshak_synonyms"]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "faq_id": { "type": "keyword" },
+      "question": { "type": "text", "analyzer": "rakshak_faq" },
+      "answer": { "type": "text", "analyzer": "rakshak_faq" },
+      "topic": { "type": "keyword" },
+      "tags": { "type": "keyword" }
+    }
+  }
+}
