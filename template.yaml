@@ -23,6 +23,7 @@ Globals:
         LOG_LEVEL: INFO
         DEFAULT_PAGE_SIZE: '20'
         MAX_PAGE_SIZE: '50'
+        OPENSEARCH_ENDPOINT: !Ref SearchEndpoint
   Api:
     Cors:
       AllowOrigin: "'*'"
@@ -30,6 +31,10 @@ Globals:
       AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
 
 Parameters:
+  SearchEndpoint:
+    Type: String
+    Default: ''
+    Description: Optional OpenSearch URL; local Docker uses http://host.docker.internal:9200.
   DynamoEndpoint:
     Type: String
     Default: http://host.docker.internal:4566
@@ -87,6 +92,28 @@ Resources:
         List:
           Type: Api
           Properties: { Path: /resources, Method: get }
+
+  AiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: src.handlers.ai.handler
+      Description: >
+        Grounded emergency and aftermath reference guidance.
+      # Higher than the read endpoints: model calls are seconds, not milliseconds.
+      Timeout: 30
+      Policies:
+        - DynamoDBReadPolicy: { TableName: !Ref EmergencyProtocolsTable }
+        - DynamoDBReadPolicy: { TableName: !Ref AftermathStepsTable }
+        - DynamoDBReadPolicy: { TableName: !Ref FAQsTable }
+        - DynamoDBReadPolicy: { TableName: !Ref ResourcesTable }
+      Events:
+        EmergencyAi:
+          Type: Api
+          Properties: { Path: /ai/emergency, Method: post }
+        AftermathAi:
+          Type: Api
+          Properties: { Path: /ai/aftermath, Method: post }
 
   HealthFunction:
     Type: AWS::Serverless::Function

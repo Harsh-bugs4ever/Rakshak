@@ -28,3 +28,13 @@ volume/
 *.swp
 .DS_Store
 Thumbs.db
+
+# Frontend build output
+frontend/node_modules/
+frontend/.next/
+frontend/next-env.d.ts
+frontend/*.tsbuildinfo
+frontend/.npm-cache/
+frontend/public/service-worker.js
+.validation/
+frontend/artifacts/

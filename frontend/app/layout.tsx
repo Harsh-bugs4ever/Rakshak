@@ -9,6 +9,8 @@
 
 import type { Metadata, Viewport } from 'next';
 import TabBar from '@/components/shared/TabBar';
+import OfflineStatus from '@/components/shared/OfflineStatus';
+import { CompanionPanel } from '@/components/shared/BrandHeader';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -31,7 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <main className="app">{children}</main>
+        <div className="app-shell"><CompanionPanel /><main className="app">{children}<OfflineStatus /></main></div>
         <TabBar />
       </body>
     </html>

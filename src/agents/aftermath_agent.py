@@ -1,37 +1,17 @@
-"""AftermathGuideAgent - Day 2.
-
-Same shape as the emergency agent: tools and prompt are ready, Strands wiring is
-the remaining work.
-
-Day 2 implementation sketch:
-
-    from strands import Agent
-    from strands.models import BedrockModel
-
-    def build_agent():
-        return Agent(
-            model=BedrockModel(model_id=MODEL_ID, temperature=0.3),
-            system_prompt=AFTERMATH_SYSTEM_PROMPT,
-            tools=AFTERMATH_TOOLS,
-        )
-"""
-
+"""Aftermath reference formatting and optional local Strands construction."""
 import os
-
 from .prompts import AFTERMATH_DISCLAIMER, AFTERMATH_SYSTEM_PROMPT
 from .tools import AFTERMATH_TOOLS
 
-MODEL_ID = os.environ.get("AFTERMATH_MODEL_ID", "claude-sonnet-5")
-TEMPERATURE = 0.3
+MODEL_ID = os.environ.get('OLLAMA_MODEL_ID', '')
+TEMPERATURE = 0
 MAX_CITATIONS = 3
 
 
 def build_agent():
-    """Construct the Strands agent. Not implemented until Day 2."""
-    raise NotImplementedError(
-        "AftermathGuideAgent is not wired up yet. "
-        "POST /ai/aftermath returns 501 until this lands."
-    )
+    """Construct a fresh local Strands selector."""
+    from .model import build_selector
+    return build_selector(AFTERMATH_TOOLS, AFTERMATH_SYSTEM_PROMPT)
 
 
 def format_reply(reply_text: str, faqs=None, stage=None, state=None) -> dict:

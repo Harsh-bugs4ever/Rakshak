@@ -1,15 +1,4 @@
-"""Push DynamoDB content into OpenSearch - Day 2.
-
-    python scripts/index_opensearch.py           # create indexes and load
-    python scripts/index_opensearch.py --recreate
-
-The index mappings live in infra/opensearch/*.mapping.json rather than in this
-file, so they can be applied by any client and reviewed as data.
-
-Remaining work: `pip install opensearch-py`, then implement `client()` in
-src/common/search.py. The document-shaping below is already correct, so this
-becomes a few lines.
-"""
+"""Create OpenSearch indexes and bulk-upsert DynamoDB reference content."""
 
 import argparse
 import json
@@ -86,10 +75,18 @@ def main(argv=None) -> int:
         if args.dry_run:
             continue
         try:
-            search.client()
-        except NotImplementedError as exc:
-            print(f"\n  not implemented yet: {exc}")
-            print("  Day 2: pip install opensearch-py, implement search.client().")
+            from opensearchpy.helpers import bulk
+
+            connection = search.client()
+            if args.recreate and connection.indices.exists(index=index):
+                connection.indices.delete(index=index)
+            if not connection.indices.exists(index=index):
+                connection.indices.create(index=index, body=load_mapping(spec["mapping"]))
+            actions = [{"_index": index, **document} for document in documents]
+            if actions:
+                bulk(connection, actions, raise_on_error=True, refresh=True)
+        except Exception as exc:
+            print(f"\n  Indexing failed ({type(exc).__name__}). Check the search endpoint and mappings.")
             return 1
 
     if args.dry_run:

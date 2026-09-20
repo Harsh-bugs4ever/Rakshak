@@ -1,11 +1,8 @@
-"""GET /resources - hospitals, legal aid, NGOs and government schemes.
-
-Day 1 filters in the Lambda over a full scan. The table holds tens of rows, so
-this is both correct and fast; Day 2 moves the free-text and geo paths to
-OpenSearch behind the same response shape.
-"""
+"""Resource filtering and distance search with an optional OpenSearch backend."""
 
 from ..common import params
+from ..common import search
+from ..common.errors import UpstreamError
 from ..common.authz import principal_from_event, require
 from ..common.geo import extract_point, haversine_km
 from ..common.http import api_handler
@@ -32,6 +29,21 @@ def handler(event, context, timer):
     text = params.get_query_text(qs)
     coords = params.get_coords(qs)
     limit = params.get_limit(qs)
+
+    if search.enabled():
+        try:
+            items, total = search.search_with_total(
+                search.RESOURCES_INDEX,
+                search.build_resource_query(text, type_filter, state, city, coords, limit),
+            )
+            if coords:
+                items = _with_distance(items, coords)
+            return ok(
+                {"count": len(items), "total": total, "items": items},
+                meta={"source": "opensearch", "took_ms": timer.ms},
+            )
+        except UpstreamError:
+            pass
 
     items = scan_all("resources")
     items = [i for i in items if _matches(i, type_filter, state, city, text)]

@@ -1,23 +1,17 @@
-"""POST /ai/emergency and /ai/aftermath - the Strands Agents endpoints.
-
-Day 1 status: the routes exist and validate their input, but the agents are not
-wired up yet, so they answer 501 NOT_IMPLEMENTED in the standard envelope.
-
-That is deliberate. A route that 404s would force the frontend to special-case
-its absence and then special-case its arrival; a route that returns a
-well-formed 501 lets the UI ship its "assistant unavailable, here are the
-protocol steps" fallback now and keep working unchanged when Day 2 lands.
-
-Request validation is live already, so the client contract is enforced from the
-start rather than discovered later.
-"""
+"""POST /ai/*: grounded reference guidance and optional local Strands selection."""
 
 import json
+import base64
+import binascii
+from uuid import uuid4
+
+from ..agents import guidance
+from ..common.authz import principal_from_event, require
 
 from ..common.errors import BadRequest
 from ..common.http import api_handler
 from ..common.params import http_method
-from ..common.response import fail
+from ..common.response import ok
 
 MAX_MESSAGE_LEN = 1000
 MAX_SESSION_LEN = 64
@@ -29,29 +23,30 @@ def handler(event, context, timer):
         raise BadRequest("This endpoint accepts POST only.")
 
     request = parse_request(event)
-    mode = "emergency" if "/emergency" in _path(event) else "aftermath"
+    path = _path(event)
+    if path not in ('/ai/emergency', '/ai/aftermath'):
+        raise BadRequest('Unknown assistant route.')
+    mode = path.rsplit('/', 1)[-1]
+    principal = principal_from_event(event)
+    for resource in (('EmergencyProtocols',) if mode == 'emergency' else ('FAQs', 'AftermathSteps', 'Resources')):
+        require(principal, 'read', resource)
+    answer, source = getattr(guidance, mode)(request['message'], request['context'])
+    answer['session_id'] = request['session_id'] or str(uuid4())
+    return ok(answer, headers={'Cache-Control': 'no-store'}, meta={'source': source, 'agent': 'strands' if source == 'strands+reference' else None, 'took_ms': timer.ms})
 
-    return fail(
-        "NOT_IMPLEMENTED",
-        "The assistant is not available yet. Use the protocol steps in the app.",
-        status=501,
-        details={
-            "mode": mode,
-            "session_id": request["session_id"],
-            # Tells the UI to render bundled guidance rather than retrying.
-            "retryable": False,
-        },
-        meta={"source": "stub", "agent": None, "took_ms": timer.ms},
-    )
 
 
 def parse_request(event) -> dict:
     """Validate the POST body against the contract in docs/api-spec.md.
 
-    Enforced now so the frontend cannot drift into a shape the agents will
-    reject on Day 2.
+    Validate before retrieval or optional model inference.
     """
     raw = (event or {}).get("body")
+    if (event or {}).get('isBase64Encoded') and isinstance(raw, str):
+        try:
+            raw = base64.b64decode(raw, validate=True).decode('utf-8')
+        except (ValueError, UnicodeError, binascii.Error):
+            raise BadRequest('Request body must be valid base64 JSON.')
     if raw is None or (isinstance(raw, str) and not raw.strip()):
         raise BadRequest("A JSON body with a 'message' field is required.")
 

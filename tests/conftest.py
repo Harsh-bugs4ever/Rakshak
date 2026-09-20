@@ -33,6 +33,8 @@ def aws_env(monkeypatch):
     monkeypatch.delenv("AWS_ENDPOINT_URL", raising=False)
     monkeypatch.delenv("DEFAULT_PAGE_SIZE", raising=False)
     monkeypatch.delenv("MAX_PAGE_SIZE", raising=False)
+    monkeypatch.delenv("OPENSEARCH_ENDPOINT", raising=False)
+    monkeypatch.delenv("AI_PROVIDER", raising=False)
 
 
 @pytest.fixture

@@ -9,9 +9,9 @@ services:
     image: localstack/localstack:latest
     container_name: rakshak-localstack
     ports:
-      - "4566:4566"
+      - "127.0.0.1:4566:4566"
     environment:
-      - SERVICES=dynamodb,opensearch
+      - SERVICES=dynamodb
       - DEBUG=0
       - PERSISTENCE=0
       - AWS_DEFAULT_REGION=ap-south-1
@@ -25,3 +25,19 @@ services:
       timeout: 5s
       retries: 10
       start_period: 20s
+
+  opensearch:
+    image: opensearchproject/opensearch:2.19.1
+    profiles: [search]
+    ports:
+      - "127.0.0.1:9200:9200"
+    environment:
+      - discovery.type=single-node
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+      - DISABLE_SECURITY_PLUGIN=true
+      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 15

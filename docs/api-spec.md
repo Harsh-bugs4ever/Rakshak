@@ -434,3 +434,26 @@ awslocal dynamodb create-table --table-name Resources \
 # 3. Seed from data/*.json, then run the API
 sam local start-api --env-vars env.json --port 3000
 ```
+
+
+## Current assistant and search implementation
+
+`POST /ai/emergency` and `POST /ai/aftermath` now return 200 envelopes with
+reference guidance. Emergency replies include `steps`, `do_not`, `protocol_id`,
+`severity`, `actions`, `disclaimer`, and `session_id`. Aftermath replies include
+`reply`, `citations`, `suggested_next`, `disclaimer`, and `session_id`.
+
+`meta.source` is `reference` by default, `strands+reference` after successful
+optional local model selection, or `reference-fallback` after model failure.
+A model-selected identifier must belong to the retrieved candidates; generated
+prose is never returned. Emergency routing is deterministic. An unknown question
+returns a useful redirection rather than a guessed protocol. Session IDs are
+correlation values only; no conversation history is persisted. AI responses use
+`Cache-Control: no-store`.
+
+Setting `OPENSEARCH_ENDPOINT` enables search on free-text FAQs and resources.
+Search replies identify `meta.source=opensearch`; an unavailable search service
+falls back to the database scorer. OpenSearch relevance uses the existing field
+weights but is not guaranteed to produce identical ordering to the scan scorer.
+Resource `total` is the total number of hits before limiting; missing distances
+are null, never Infinity.

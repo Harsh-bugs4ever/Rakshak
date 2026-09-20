@@ -115,8 +115,7 @@ export const searchResources = ({ lat, lon, ...rest }: ResourceQuery = {}) =>
   });
 
 // --- AI ---------------------------------------------------------------------
-// Returns 501 NOT_IMPLEMENTED until the Day 2 agents land. Callers should check
-// `error.code` and fall back to protocol steps rather than showing a failure.
+// Grounded reference guidance, with optional local Strands FAQ matching.
 
 async function postAi<T>(path: string, body: unknown): Promise<Envelope<T>> {
   return request<T>(path, {}, {

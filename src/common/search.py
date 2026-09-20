@@ -1,15 +1,8 @@
-"""OpenSearch client and query builders - Day 2.
-
-The query builders are implemented now because they are pure functions and they
-encode a decision that must not drift: the field weighting here (question 3x,
-tags 2x, answer 1x) is the same weighting `handlers/aftermath.py` uses in its
-Day 1 scorer. Switching engines must not reorder results under the UI.
-
-`client()` raises until the OpenSearch dependency is added, so nothing can
-silently half-work.
-"""
+"""Optional OpenSearch retrieval with bounded requests and query builders."""
 
 import os
+import math
+from functools import lru_cache
 
 from .errors import UpstreamError
 
@@ -22,21 +15,24 @@ ANSWER_BOOST = 1
 
 
 def endpoint():
-    return os.environ.get("OPENSEARCH_ENDPOINT") or "http://localhost:4566"
+    return os.environ.get("OPENSEARCH_ENDPOINT") or "http://localhost:9200"
+
+
+def enabled():
+    return bool(os.environ.get("OPENSEARCH_ENDPOINT"))
 
 
 def client():
-    """OpenSearch client. Not implemented until Day 2.
+    """Reuse a client per configured endpoint."""
+    return _client(endpoint())
 
-    Day 2: `pip install opensearch-py`, then
 
-        from opensearchpy import OpenSearch
-        return OpenSearch(hosts=[endpoint()], http_compress=True)
-    """
-    raise NotImplementedError(
-        "OpenSearch is not wired up yet. Search falls back to the DynamoDB "
-        "scorer in handlers/aftermath.py; meta.source reports which engine ran."
-    )
+@lru_cache(maxsize=4)
+def _client(url):
+    from opensearchpy import OpenSearch
+
+    return OpenSearch(hosts=[url], http_compress=True, timeout=2,
+                      max_retries=0, retry_on_timeout=False)
 
 
 def build_faq_query(text: str, topic: str = None, limit: int = 10) -> dict:
@@ -84,15 +80,20 @@ def build_resource_query(text=None, type=None, state=None, city=None,
     if state:
         filters.append(
             {"bool": {"should": [
-                {"term": {"state": state}},
-                {"term": {"state": "All India"}},
+                {"term": {"state": state.strip().lower()}},
+                {"term": {"state": "all india"}},
             ], "minimum_should_match": 1}}
         )
     if city:
-        filters.append({"term": {"city": city}})
+        filters.append({"bool": {"should": [
+            {"term": {"city": city.strip().lower()}},
+            {"term": {"city": ""}},
+            {"bool": {"must_not": [{"exists": {"field": "city"}}]}},
+        ], "minimum_should_match": 1}})
 
     query = {
         "size": max(1, int(limit)),
+        "track_total_hits": True,
         "query": {"bool": {"must": must or [{"match_all": {}}], "filter": filters}},
     }
 
@@ -109,6 +110,8 @@ def build_resource_query(text=None, type=None, state=None, city=None,
                 }
             }
         ]
+    elif not text:
+        query["sort"] = [{"name.raw": "asc"}, {"resource_id": "asc"}]
 
     return query
 
@@ -123,7 +126,8 @@ def parse_hits(response: dict) -> list:
             record["score"] = round(float(hit["_score"]), 3)
         sort = hit.get("sort") or []
         if sort and isinstance(sort[0], (int, float)):
-            record["distance_km"] = round(float(sort[0]), 2)
+            value = float(sort[0])
+            record["distance_km"] = round(value, 2) if math.isfinite(value) else None
         out.append(record)
     return out
 
@@ -132,7 +136,16 @@ def search(index: str, query: dict) -> list:
     """Run a query. Wraps failures so a search outage never 500s the API."""
     try:
         return parse_hits(client().search(index=index, body=query))
-    except NotImplementedError:
-        raise
     except Exception as exc:  # noqa: BLE001
+        raise UpstreamError("Search is unavailable.") from exc
+
+
+def search_with_total(index: str, query: dict):
+    try:
+        response = client().search(index=index, body=query)
+        total = response.get("hits", {}).get("total", 0)
+        if isinstance(total, dict):
+            total = total.get("value", 0)
+        return parse_hits(response), int(total)
+    except Exception as exc:
         raise UpstreamError("Search is unavailable.") from exc

@@ -141,6 +141,7 @@ export interface EmergencyAiReply {
   session_id: string;
   reply: string;
   steps: string[];
+  do_not?: string[];
   protocol_id: string | null;
   severity: Severity | null;
   actions: AiAction[];

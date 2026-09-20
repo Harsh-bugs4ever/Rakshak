@@ -1,17 +1,10 @@
-"""GET /aftermath/* - the family-support endpoints.
-
-Two routes:
-  /aftermath/steps  - the four stages (hospital, police, insurance, legal)
-  /aftermath/faqs   - filtered by topic, and/or searched by free text
-
-Day 1 backs FAQ search with a DynamoDB scan and a small relevance scorer, so
-the endpoint is complete and testable before OpenSearch is wired up on Day 2.
-The response `meta.source` tells you which engine answered.
-"""
+"""Aftermath checklists and FAQ search, with optional OpenSearch retrieval."""
 
 import re
 
 from ..common import params
+from ..common import search
+from ..common.errors import UpstreamError
 from ..common.authz import principal_from_event, require
 from ..common.http import api_handler
 from ..common.response import ok
@@ -86,6 +79,16 @@ def _faqs(qs, timer):
     text = params.get_query_text(qs)
     limit = params.get_limit(qs, default=10)
 
+    if text and search.enabled():
+        try:
+            items = search.search(search.TOPICS_INDEX, search.build_faq_query(text, topic, limit))
+            return ok(
+                {"topic": topic, "query": text, "count": len(items), "items": items},
+                meta={"source": "opensearch", "took_ms": timer.ms},
+            )
+        except UpstreamError:
+            pass  # A search outage must not hide the database reference library.
+
     # Topic alone is an indexed lookup; free text needs the whole corpus.
     if topic and not text:
         items = query_index("faqs", TOPIC_INDEX, "topic", topic, limit=limit)
@@ -132,9 +135,8 @@ def tokenize(text: str):
 def score(item, tokens) -> float:
     """Relevance for one FAQ.
 
-    Weighting mirrors the OpenSearch query in docs/api-spec.md - question 3x,
-    tags 2x, answer 1x - so swapping in OpenSearch on Day 2 does not reorder
-    results out from under the UI.
+    Field weights mirror the OpenSearch query (question 3x, tags 2x, answer
+    1x), although BM25 and this small-corpus scorer can rank differently.
     """
     if not tokens:
         return 0.0

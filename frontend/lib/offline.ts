@@ -12,7 +12,7 @@
 
 import type { Protocol, TriageAnswer } from './types';
 
-export const OFFLINE_PROTOCOLS: Record<string, Protocol> = {
+export const OFFLINE_PROTOCOLS = {
   not_breathing: {
     scenario_id: 'not_breathing',
     title: 'Person is not breathing',
@@ -80,7 +80,7 @@ export const OFFLINE_PROTOCOLS: Record<string, Protocol> = {
       'Do not prop them up in a sitting position.',
     ],
   },
-};
+} satisfies Record<string, Protocol>;
 
 /** Numbers, hardcoded. There is no scenario where fetching these is acceptable. */
 export const OFFLINE_NUMBERS = {

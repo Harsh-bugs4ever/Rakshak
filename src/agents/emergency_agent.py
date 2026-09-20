@@ -1,40 +1,17 @@
-"""EmergencyGuideAgent - Day 2.
-
-The tools and the system prompt are ready; only the Strands wiring is missing.
-`build_agent` raises rather than silently returning a mock, because a stub that
-pretends to work would be discovered at a crash scene.
-
-Day 2 implementation sketch:
-
-    from strands import Agent
-    from strands.models import BedrockModel
-
-    def build_agent():
-        return Agent(
-            model=BedrockModel(model_id=MODEL_ID, temperature=0.2),
-            system_prompt=EMERGENCY_SYSTEM_PROMPT,
-            tools=EMERGENCY_TOOLS,
-        )
-"""
-
+"""Emergency reference formatting and optional local Strands construction."""
 import os
-
 from .prompts import EMERGENCY_DISCLAIMER, EMERGENCY_SYSTEM_PROMPT
 from .tools import EMERGENCY_TOOLS
 
-# Low temperature on purpose: this agent reads out an approved checklist. There
-# is no upside to creative phrasing when someone is doing chest compressions.
-MODEL_ID = os.environ.get("EMERGENCY_MODEL_ID", "claude-sonnet-5")
-TEMPERATURE = 0.2
+MODEL_ID = os.environ.get('OLLAMA_MODEL_ID', '')
+TEMPERATURE = 0
 MAX_STEPS = 4
 
 
 def build_agent():
-    """Construct the Strands agent. Not implemented until Day 2."""
-    raise NotImplementedError(
-        "EmergencyGuideAgent is not wired up yet. "
-        "POST /ai/emergency returns 501 until this lands."
-    )
+    """Construct a fresh local Strands selector."""
+    from .model import build_selector
+    return build_selector(EMERGENCY_TOOLS, EMERGENCY_SYSTEM_PROMPT)
 
 
 def format_reply(protocol: dict, reply_text: str = "") -> dict:
@@ -58,6 +35,7 @@ def format_reply(protocol: dict, reply_text: str = "") -> dict:
     return {
         "reply": reply_text.strip(),
         "steps": steps,
+        "do_not": list(protocol.get("do_not") or []),
         "protocol_id": protocol.get("scenario_id"),
         "severity": protocol.get("severity"),
         "actions": actions,
